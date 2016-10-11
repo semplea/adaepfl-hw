@@ -12,7 +12,7 @@ Example usage:
 
 
 Will output a dict containing a global data frame
-The data frame is indexed by the the year, semester, season and sciper
+The data frame is indexed by the the year, semester and sciper
 """
 
 years = {
@@ -24,46 +24,40 @@ years = {
 	'2012': '123456101',
 	'2013': '213637754',
 	'2014': '213637922',
-	'2015-2016': '213638028',
+	'2015': '213638028',
 	'2016': '355925344'
 }
 
 semesters = {
 	'B1': '249108',
+    'B5': '942120',
 	'B6': '942175',
-	'B6b': '2226785',
 	'M1': '2230106',
 	'M3': '2230128',
-	'M4': '2230140',
 	'PMAut': '249127',
 	'PMSpr': '3781783'
 }
 
-seasons = {
-    'Autumn': '2936286',
-    'Spring': '2936295'
-    }
+indexes =  ["year", "semester"]
 
-indexes =  ["year", "semester", "season"]
-
-def get_url(year, semester, season):
+def get_url(year, semester):
     """Get the url corresponding to a given year and semester"""
-    y, sem, sea = years[year], semesters[semester], seasons[season]
-    return 'http://isa.epfl.ch/imoniteur_ISAP/!GEDPUBLICREPORTS.html?ww_x_GPS=-1&ww_i_reportModel=133685247&ww_i_reportModelXsl=133685270&ww_x_UNITE_ACAD=249847&ww_x_PERIODE_ACAD='+ y +'&ww_x_PERIODE_PEDAGO=' + sem + '&ww_x_HIVERETE=' + sea
+    y, sem = years[year], semesters[semester]
+    return 'http://isa.epfl.ch/imoniteur_ISAP/!GEDPUBLICREPORTS.html?ww_x_GPS=-1&ww_i_reportModel=133685247&ww_i_reportModelXsl=133685270&ww_x_UNITE_ACAD=249847&ww_x_PERIODE_ACAD='+ y +'&ww_x_PERIODE_PEDAGO=' + sem + '&ww_x_HIVERETE=null'
 
-def request(year, semester, season):
+def request(year, semester):
     """return the http request corresponding to a given year and semester"""
-    url = get_url(year, semester, season)
+    url = get_url(year, semester)
     return requests.get(url, verify=False)
 
-def get_soup(year, semester, season):
+def get_soup(year, semester):
     """return the data soup (BeautifulSoup) corresponding to a given year and semester"""
-    r = request(year, semester, season)
+    r = request(year, semester)
     data = r.text
     return BeautifulSoup(data)
 
 
-def get_table(soup, year, semester, season):
+def get_table(soup, year, semester):
     """Transform the data soup into a dict containing the data frame
     Each dict contains the section, the year, and the dataframe containing all the corresponding data
     The dataframe contains all the columns returned by the html page + the index corresponding to "indexes"
@@ -83,14 +77,14 @@ def get_table(soup, year, semester, season):
         df = pd.DataFrame(columns=columns) ##create the data frame with the columns from this list
 
     for c in tc:
-        t = [year, semester, season] + list(map(lambda l: l.text, c.children))[:-1] ##transform the children into a list of the inner text of each children (corresponding here to each column)
+        t = [year, semester] + list(map(lambda l: l.text, c.children))[:-1] ##transform the children into a list of the inner text of each children (corresponding here to each column)
         df.loc[df.shape[0]] = t ##append the data to the last dataframe created
 
     sciper_c = columns[-1]
     df = df.set_index(indexes + [sciper_c])
 
-    return {"year": year, "semester": semester, "season": season, "data": df}
+    return df
 
-def mine_data(year, semester, season):
-    soup = get_soup(year, semester, season) ##get the soup
-    return get_table(soup, year, semester, season) ##process the soup
+def mine_data(year, semester):
+    soup = get_soup(year, semester) ##get the soup
+    return get_table(soup, year, semester) ##process the soup
