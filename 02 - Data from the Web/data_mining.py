@@ -11,8 +11,8 @@ Example usage:
 ...
 
 
-Will output a list of dict.
-Each dict contains the section, the year, and the dataframe containing all the data.
+Will output a dict containing a global data frame
+The data frame is indexed by the the year, semester, season and section
 """
 
 years = {
@@ -64,9 +64,9 @@ def get_soup(year, semester, season):
 
 
 def get_table(soup, year, semester, season):
-    """Transform the data soup into a list of dict
+    """Transform the data soup into a dict containing the data frame
     Each dict contains the section, the year, and the dataframe containing all the corresponding data
-    The dataframe contains all the columns returned by the html page
+    The dataframe contains all the columns returned by the html page + the index corresponding to "indexes"
     """
     global indexes
     table = soup.html.body.table ##get to the table
