@@ -7,7 +7,7 @@ import re
 """
 Example usage:
 >>> from data_mining import *
->>> mine_data('2009', 'B1')
+>>> mine_data('2009', 'B1', 'Spring')
 ...
 
 
