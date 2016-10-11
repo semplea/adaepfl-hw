@@ -86,6 +86,8 @@ def get_table(soup, year, semester, season):
         t = [year, semester, season] + list(map(lambda l: l.text, c.children))[:-1] ##transform the children into a list of the inner text of each children (corresponding here to each column)
         df.loc[df.shape[0]] = t ##append the data to the last dataframe created
 
+    sciper_c = columns[-1]
+    df = df.set_index(indexes + [sciper_c])
 
     return {"year": year, "semester": semester, "season": season, "data": df}
 
