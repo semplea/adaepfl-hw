@@ -12,7 +12,7 @@ Example usage:
 
 
 Will output a dict containing a global data frame
-The data frame is indexed by the the year, semester, season and section
+The data frame is indexed by the the year, semester, season and sciper
 """
 
 years = {
