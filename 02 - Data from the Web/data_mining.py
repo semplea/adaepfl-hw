@@ -12,7 +12,7 @@ Example usage:
 
 
 Will output a dict containing a global data frame
-The data frame is indexed by the the year, semester, season and section
+The data frame is indexed by the the year, semester, season and sciper
 """
 
 years = {
@@ -44,12 +44,12 @@ seasons = {
     'Spring': '2936295'
     }
 
-indexes =  ["year", "semester", "season", "section"]
+indexes =  ["year", "semester", "season"]
 
 def get_url(year, semester, season):
     """Get the url corresponding to a given year and semester"""
     y, sem, sea = years[year], semesters[semester], seasons[season]
-    return 'http://isa.epfl.ch/imoniteur_ISAP/!GEDPUBLICREPORTS.html?ww_x_GPS=-1&ww_i_reportModel=133685247&ww_i_reportModelXsl=133685270&ww_x_UNITE_ACAD=null&ww_x_PERIODE_ACAD='+ y +'&ww_x_PERIODE_PEDAGO=' + sem + '&ww_x_HIVERETE=' + sea
+    return 'http://isa.epfl.ch/imoniteur_ISAP/!GEDPUBLICREPORTS.html?ww_x_GPS=-1&ww_i_reportModel=133685247&ww_i_reportModelXsl=133685270&ww_x_UNITE_ACAD=249847&ww_x_PERIODE_ACAD='+ y +'&ww_x_PERIODE_PEDAGO=' + sem + '&ww_x_HIVERETE=' + sea
 
 def request(year, semester, season):
     """return the http request corresponding to a given year and semester"""
@@ -72,31 +72,24 @@ def get_table(soup, year, semester, season):
     table = soup.html.body.table ##get to the table
     list_df  = [] ##init list of data frame
     tc = table.children ##every rows of the table
+    first_row = next(tc, None)
+    attrs = first_row.text.split(',') ##extract the attributes from the header row
+    section = attrs[0]
+    year = attrs[1]
+    nb_student = int(attrs[2].split("(")[1].split(" ")[0])
+    if nb_student != 0: ##next row should contain columns info (except if there is no student)
+        next_row = next(tc, None) ##directly iterate our iterator the next row
+        columns = indexes + list(map(lambda l: l.text, next_row.children)) ##transform the children into a list of the inner text of each children
+        df = pd.DataFrame(columns=columns) ##create the data frame with the columns from this list
+
     for c in tc:
-        tagName = next(c.children).name ##get the tag name of the row
-        if tagName == "th": ##if it's a header row
-            attrs = c.text.split(',') ##extract the attributes from the header row
-            section = attrs[0]
-            year = attrs[1]
-            nb_student = int(attrs[2].split("(")[1].split(" ")[0])
-            if nb_student != 0: ##next row should contain columns info (except if there is no student)
-                next_row = next(tc, None) ##directly iterate our iterator the next row
-                columns = indexes + list(map(lambda l: l.text, next_row.children)) ##transform the children into a list of the inner text of each children
-                df = pd.DataFrame(columns=columns) ##create the data frame with the columns from this list
-                list_df.append(df) ##append df to the global list
-        else: ##if it's not a header row, it's a data row
-            t = [year, semester, season, section] + list(map(lambda l: l.text, c.children))[:-1] ##transform the children into a list of the inner text of each children (corresponding here to each column)
-            df.loc[df.shape[0]] = t ##append the data to the last dataframe created
+        t = [year, semester, season] + list(map(lambda l: l.text, c.children))[:-1] ##transform the children into a list of the inner text of each children (corresponding here to each column)
+        df.loc[df.shape[0]] = t ##append the data to the last dataframe created
 
-    if len(list_df) > 0:
-        global_df = list_df[0]
-        for df in list_df[1:]:
-            global_df.append(df)
-        global_df = global_df.set_index(indexes)
-    else:
-        global_df = []
+    sciper_c = columns[-1]
+    df = df.set_index(indexes + [sciper_c])
 
-    return {"year": year, "semester": semester, "season": season, "data": global_df}
+    return {"year": year, "semester": semester, "season": season, "data": df}
 
 def mine_data(year, semester, season):
     soup = get_soup(year, semester, season) ##get the soup
