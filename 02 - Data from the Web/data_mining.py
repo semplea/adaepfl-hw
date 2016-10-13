@@ -1,9 +1,15 @@
 from bs4 import BeautifulSoup
-
+%matplotlib inline
 import requests
 import pandas as pd
 import re
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import scipy.stats as stats
+import pylab as pl
 
+sns.set_context('notebook')
 """
 Example usage:
 >>> from data_mining import *
@@ -11,7 +17,7 @@ Example usage:
 ...
 
 
-Will output a dict containing a global data frame
+Will output a global data frame indexed by sciper
 The data frame is indexed by the the year, semester and sciper
 """
 
@@ -33,12 +39,13 @@ semesters = {
     'B5': '942120',
 	'B6': '942175',
 	'M1': '2230106',
+    'M2': '942192',
 	'M3': '2230128',
 	'PMAut': '249127',
 	'PMSpr': '3781783'
 }
 
-indexes =  ["year", "semester"]
+indexes =  []
 
 def get_url(year, semester):
     """Get the url corresponding to a given year and semester"""
@@ -54,7 +61,7 @@ def get_soup(year, semester):
     """return the data soup (BeautifulSoup) corresponding to a given year and semester"""
     r = request(year, semester)
     data = r.text
-    return BeautifulSoup(data)
+    return BeautifulSoup(data,"lxml")
 
 
 def get_table(soup, year, semester):
@@ -68,22 +75,24 @@ def get_table(soup, year, semester):
     tc = table.children ##every rows of the table
     first_row = next(tc, None)
     attrs = first_row.text.split(',') ##extract the attributes from the header row
-    section = attrs[0]
-    year = attrs[1]
+    #section = attrs[0]
+    #year = attrs[1]
     nb_student = int(attrs[2].split("(")[1].split(" ")[0])
     if nb_student != 0: ##next row should contain columns info (except if there is no student)
         next_row = next(tc, None) ##directly iterate our iterator the next row
-        columns = indexes + list(map(lambda l: l.text, next_row.children)) ##transform the children into a list of the inner text of each children
+        columns = list(map(lambda l: l.text, next_row.children)) ##transform the children into a list of the inner text of each children
         df = pd.DataFrame(columns=columns) ##create the data frame with the columns from this list
 
-    for c in tc:
-        t = [year, semester] + list(map(lambda l: l.text, c.children))[:-1] ##transform the children into a list of the inner text of each children (corresponding here to each column)
-        df.loc[df.shape[0]] = t ##append the data to the last dataframe created
+        for c in tc:
+            t = list(map(lambda l: l.text, c.children))[:-1] ##transform the children into a list of the inner text of each children (corresponding here to each column)
+            df.loc[df.shape[0]] = t ##append the data to the last dataframe created
 
-    sciper_c = columns[-1]
-    df = df.set_index(indexes + [sciper_c])
-
-    return df
+        sciper_c = columns[-1]
+        df = df.set_index([sciper_c, 'Nom Prénom'])
+        df[semester+'_year'] = year 
+    
+        return df
+    return pd.DataFrame()
 
 def mine_data(year, semester):
     soup = get_soup(year, semester) ##get the soup
