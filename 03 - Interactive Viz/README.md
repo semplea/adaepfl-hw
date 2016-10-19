@@ -27,7 +27,7 @@ To do so, you will need to use the provided TopoJSON file, combined with the Cho
 *HINT*: the P3 database is formed by entries which assign a grant (and its approved amount) to a University name. Therefore you will need a smart strategy to go from University
 to Canton name. The [Geonames Full Text Search API in JSON](http://www.geonames.org/export/web-services.html) can help you with this -- try to use it as much as possible
 to build the canton mappings that you need. For those universities for which you cannot find a mapping via the API, you are then allowed to build it manually -- feel free to stop 
-by the time you mapped the top-95% of the universities.
+by the time you mapped the top-95% of the universities. I also recommend you to use an intermediate viz step for debugging purposes, showing all the universties as markers in your map (e.g., if you don't select the right results from the Geonames API, some of your markers might be placed on nearby countries...)
 
 2. *BONUS*: using the map you have just built, and the geographical information contained in it, could you give a *rough estimate* of the difference in research funding
 between the areas divided by the [Röstigraben](https://en.wikipedia.org/wiki/R%C3%B6stigraben)?
