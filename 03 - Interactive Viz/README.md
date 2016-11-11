@@ -1,3 +1,8 @@
+# FILES FOR GRADING: 
+* Main notebook: Data viz.ipynb
+* HTML maps: intermediate_map.html, final_map.html
+
+
 # 03 - Interactive Viz
 
 ## Deadline
