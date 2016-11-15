@@ -30,3 +30,7 @@ your data in at least 20 folds. Can you find a set of parameters that leads to h
 2. Aggregate the referee information grouping by soccer player, and use an unsupervised learning technique to cluster the soccer players in 2 disjoint
 clusters. Remove features iteratively, and at each step perform again the clustering and compute the silhouette score -- can you find a configuration of features with high silhouette
 score where players with dark and light skin colors belong to different clusters? Discuss the obtained results.
+
+## Trivia
+Credits to [@CriMenghini](https://github.com/CriMenghini)
+![](panda.png?raw=true)
