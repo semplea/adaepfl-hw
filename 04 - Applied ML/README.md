@@ -1,7 +1,7 @@
 # 04 - Applied ML
 
 ## Deadline
-Tuesday November 22, 2016 at 11:59PM
+Thursday November 24, 2016 at 11:59PM
 
 ## Important Notes
 * Make sure you push on GitHub your Notebook with all the cells already evaluated
